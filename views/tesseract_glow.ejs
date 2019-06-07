@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<title>MARVEL'S TESSERACT</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+<body>
+	<script src="/threejs/three.min.js"></script>
+	<script src="/threejs/Detector.js"></script>
+	<script src="/threejs/Stats.js"></script>
+	<script src="/threejs/OrbitControls.js"></script>
+
+	<script src="/threejs/modifiers/BufferSubdivisionModifier.js"></script>
+	<script src="/threejs/postprocessing/EffectComposer.js"></script>
+	<script src="/threejs/postprocessing/RenderPass.js"></script>
+	<script src="/threejs/postprocessing/MaskPass.js"></script>
+	<script src="/threejs/postprocessing/ShaderPass.js"></script>
+	<script src="/threejs/shaders/CopyShader.js"></script>
+	<script src="/threejs/shaders/FXAAShader.js"></script>
+	<script src="/threejs/shaders/ConvolutionShader.js"></script>
+	<script src="/threejs/shaders/LuminosityHighPassShader.js"></script>
+	<script src="/threejs/postprocessing/UnrealBloomPass.js"></script>
+
+	<!-- Fire -->
+	<script src="/javascripts/FireShader.js"></script>
+	<script src="/javascripts/Fire.js"></script>
+
+	<script id="glowVertexShader" type="x-shader/x-vertex">
+	uniform vec3 viewVector;
+	uniform float c;
+	uniform float p;
+	varying float intensity;
+	void main() 
+	{
+		vec3 vNormal = normalize( normalMatrix * normal );
+		vec3 vNormel = normalize( normalMatrix * viewVector );
+		intensity = pow( c - dot(vNormal, vNormel), p );
+		
+		gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+	}
+	</script>
+
+	<script id="glowFragmentShader" type="x-shader/x-vertex"> 
+	uniform vec3 glowColor;
+	varying float intensity;
+	void main() 
+	{
+		vec3 glow = glowColor * intensity;
+	    gl_FragColor = vec4( glow, 0.5 );
+	}
+	</script>
+
+	<script type="x-shader/x-vertex" id="particleVertexshader">
+		attribute float size;
+		varying vec3 vColor;
+		void main() {
+			vColor = color;
+			vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+			gl_PointSize = size * ( 300.0 / -mvPosition.z );
+			gl_Position = projectionMatrix * mvPosition;
+		}
+	</script>
+	<script type="x-shader/x-fragment" id="particleFragmentshader">
+		uniform sampler2D texture;
+		varying vec3 vColor;
+		void main() {
+			gl_FragColor = vec4( vColor, 1.0 );
+			gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
+		}
+	</script>
+
+	<div id="ThreeJS" style="position: absolute; left:0px; top:0px"></div>
+
+    <script src="/javascripts/tesseract_glow.js"></script>
+</body>
+</html>

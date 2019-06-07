@@ -1,0 +1,18 @@
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: white!important;
+}
+
+a:hover {
+  color: rgb(180, 180, 180)!important;
+}
+
+canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+}

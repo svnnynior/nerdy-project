@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<title>THE EASTER EGG</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+<body>
+	<script src="/threejs/three.min.js"></script>
+	<script src="/threejs/Detector.js"></script>
+	<script src="/threejs/Stats.js"></script>
+	<script src="/threejs/OrbitControls.js"></script>
+	<script src="/threejs/THREEx.KeyboardState.js"></script>
+	<script src="/threejs/THREEx.FullScreen.js"></script>
+	<script src="/threejs/THREEx.WindowResize.js"></script>
+	<script src="/threejs/EffectComposer.js"></script>
+	<script src="/threejs/SubdivisionModifier.js"></script>
+
+	<script src="/threejs/postprocessing/EffectComposer.js"></script>
+	<script src="/threejs/postprocessing/RenderPass.js"></script>
+	<script src="/threejs/postprocessing/MaskPass.js"></script>
+	<script src="/threejs/postprocessing/ShaderPass.js"></script>
+	<script src="/threejs/shaders/CopyShader.js"></script>
+	<script src="/threejs/shaders/FXAAShader.js"></script>
+	<script src="/threejs/shaders/ConvolutionShader.js"></script>
+	<script src="/threejs/shaders/LuminosityHighPassShader.js"></script>
+	<script src="/threejs/postprocessing/UnrealBloomPass.js"></script>
+	<script src="/threejs/GPUParticleSystem.js"></script>
+
+	<script src="/threejs/shaders/ConvolutionShader.js"></script>
+	<script src="/threejs/shaders/CopyShader.js"></script>
+	<script src="/threejs/shaders/FilmShader.js"></script>
+
+	<script src="/threejs/postprocessing/EffectComposer.js"></script>
+	<script src="/threejs/postprocessing/ShaderPass.js"></script>
+	<script src="/threejs/postprocessing/MaskPass.js"></script>
+	<script src="/threejs/postprocessing/RenderPass.js"></script>
+	<script src="/threejs/postprocessing/BloomPass.js"></script>
+	<script src="/threejs/postprocessing/FilmPass.js"></script>
+
+	<script src="/threejs/Detector.js"></script>
+
+	<script id="glowVertexShader" type="x-shader/x-vertex">
+	uniform vec3 viewVector;
+	uniform vec3 lightVector;
+	uniform float p;
+	varying float intensity;
+	void main() 
+	{
+	    vec3 light = normalize( lightVector );
+	    vec3 vNormal = normalize( normal );
+	    float dotNL = dot(vNormal,light);
+	    vec3 nnl = vNormal * dotNL;
+	    vec3 nnl2 = 2.0 * nnl;
+	    vec3 r = nnl2 - light;
+		vec3 n_view = normalize( viewVector );
+		intensity = pow( dot( r , n_view ), p );
+		
+	    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+	}
+	</script>
+
+	<script id="glowFragmentShader" type="x-shader/x-vertex"> 
+	uniform vec3 glowColor;
+	varying float intensity;
+	void main() 
+	{
+		vec3 glow = glowColor * intensity;
+	    gl_FragColor = vec4( glow, 1.0 );
+	}
+	</script>
+
+	<script id="fragmentShader" type="x-shader/x-fragment">
+		uniform sampler2D baseTexture;
+		uniform float baseSpeed;
+		uniform sampler2D noiseTexture;
+		uniform float noiseScale;
+		uniform sampler2D blendTexture;
+		uniform float time;
+		uniform float alpha;
+		varying vec2 vUv;
+		void main() 
+		{
+
+			vec2 timeShift = vUv + vec2( 1, -1.5 ) * time * baseSpeed;
+			vec4 noise = texture2D(noiseTexture, timeShift);
+			vec2 uvNoiseTimeShift = vUv + noiseScale * vec2( noise.r, noise.b );
+			vec4 baseColor = texture2D( baseTexture, uvNoiseTimeShift);
+			vec4 blendColor1 = texture2D( blendTexture, uvNoiseTimeShift);
+			vec4 blendColor2 = baseColor-blendColor1;
+			vec4 theColor = baseColor + blendColor2/10.0;
+			theColor.a = alpha;
+			gl_FragColor = theColor;
+		}  
+	</script>
+
+	<script id="vertexShader" type="x-shader/x-vertex">
+		varying vec2 vUv;
+		void main() 
+		{ 
+		    vUv = vec2(3 , 3)* uv;
+			gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+		}
+	</script>
+
+	<div id="ThreeJS" style="position: absolute; left:0px; top:0px"></div>
+
+    <script src="/javascripts/egg.js"></script>
+</body>
+</html>
